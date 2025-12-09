@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Message</title>
+    <title>YRC2026 Program</title>
     <style>
         /* --- MOBILE FIRST MINIMALIST CSS --- */
         :root {
@@ -23,20 +23,22 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            /* Prevents scrolling if content is short */
             overflow-x: hidden; 
         }
 
         #app-container {
-            width: 85%;
+            /* FIX 1: Adjusted width to create more space on the edges */
+            /* This subtracts 50px from full width (25px gap on each side) */
+            width: calc(100% - 50px); 
             max-width: 500px;
+            
             padding: 30px;
             background-color: var(--card-bg);
             border-radius: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            opacity: 0; /* Hidden initially for seamless load */
+            opacity: 0; 
             transition: opacity 0.8s ease-in;
-            text-align: left; /* Better for reading paragraphs */
+            text-align: left;
         }
 
         h1 {
@@ -48,11 +50,10 @@
             text-align: center;
         }
 
-        /* This ensures paragraphs from txt files look good */
         #message-content {
             font-size: 1.1rem;
             line-height: 1.6;
-            white-space: pre-wrap; /* Preserves enter keys/paragraphs from your txt file */
+            white-space: pre-wrap; 
             color: #cccccc;
         }
 
@@ -69,16 +70,24 @@
 
     <div id="app-container">
         <div id="dynamic-content">
-            </div>
+        </div>
     </div>
 
     <script>
         // ================= CONFIGURATION =================
         
-        // DATE MUST BE IN UTC (Greenwich Mean Time)
-        // Example: Jan 1st 2025, 00:00:00 UTC
+        // DATE MUST BE IN UTC
         const REVEAL_DATE = "2025-12-08T00:00:00Z"; 
         const EXPIRY_DATE = "2025-12-10T00:00:00Z";
+
+        // FIX 2: Define your custom titles here
+        const PAGE_TITLES = {
+            "1": "身 1",
+            "2": "身 2",
+            "3": "心",
+            "4": "社",
+            "5": "靈"
+        };
 
         // =================================================
 
@@ -86,47 +95,41 @@
         const contentBox = document.getElementById('dynamic-content');
 
         async function init() {
-            // 1. Get ID from URL (e.g. ?id=1)
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
 
-            // 2. Check Time (Silent check, no loading screen)
             let now = await getGlobalTime();
             
             const start = new Date(REVEAL_DATE);
             const end = new Date(EXPIRY_DATE);
 
-            // 3. Logic Router
             if (now < start) {
                 renderState("early");
             } else if (now > end) {
                 renderState("expired");
             } else {
-                if(id && ["1","2","3","4","5"].includes(id)) {
+                // Check if ID exists in our new TITLES list
+                if(id && PAGE_TITLES[id]) {
                     await fetchAndShowMessage(id);
                 } else {
                     renderState("error");
                 }
             }
 
-            // 4. Reveal the UI seamlessly
             container.style.opacity = 1;
         }
 
         async function getGlobalTime() {
             try {
-                // Try Primary Source
                 const r1 = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC');
                 const d1 = await r1.json();
                 return new Date(d1.utc_datetime);
             } catch (e) {
                 try {
-                    // Try Backup Source
                     const r2 = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=UTC');
                     const d2 = await r2.json();
                     return new Date(d2.dateTime + "Z");
                 } catch (e2) {
-                    // Fail to Device Time (Silent failsafe)
                     return new Date();
                 }
             }
@@ -134,14 +137,17 @@
 
         async function fetchAndShowMessage(id) {
             try {
-                // Fetches 'message1.txt', 'message2.txt', etc.
                 const response = await fetch(`message${id}.txt`);
                 
                 if (response.ok) {
                     const text = await response.text();
+                    
+                    // Look up the title from our configuration list
+                    const titleText = PAGE_TITLES[id] || `Message ${id}`;
+
                     contentBox.innerHTML = `
                         <span class="icon">✨</span>
-                        <h1>Message ${id}</h1>
+                        <h1>${titleText}</h1>
                         <div id="message-content">${text}</div>
                     `;
                 } else {
@@ -177,7 +183,6 @@
             }
         }
 
-        // Run the script
         init();
     </script>
 </body>
