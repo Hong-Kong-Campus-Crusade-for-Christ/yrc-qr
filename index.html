@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise Message</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            background-color: #333;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 { margin-bottom: 20px; font-size: 2em; }
+        p { font-size: 1.2em; line-height: 1.6; }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="loading">
+        <div class="loader"></div>
+        <p>Verifying global time...</p>
+    </div>
+    <div id="content" style="display:none;">
+        <h1 id="title"></h1>
+        <p id="message"></p>
+    </div>
+</div>
+
+<script>
+    // ================= CONFIGURATION SECTION =================
+    
+    // 1. SET THE DATE: 
+    // Format: "YYYY-MM-DDTHH:MM:SS" (24-hour format)
+    // Example below is January 1st, 2025 at 6:00 PM (18:00)
+    const REVEAL_DATE = "2025-12-08T18:00:00"; 
+    
+    // Optional: When should the messages expire? (e.g. Jan 2nd)
+    const EXPIRY_DATE = "2025-12-10T06:00:00";
+
+    // 2. SET YOUR MESSAGES:
+    const messages = {
+        "1": "Hello World",
+        "2": "Hahahaha",
+        "3": "God is Good",
+        "4": "ABCDEFG"
+    };
+
+    // ================= END CONFIGURATION =================
+
+    async function checkTime() {
+        const loadingDiv = document.getElementById('loading');
+        const contentDiv = document.getElementById('content');
+        const title = document.getElementById('title');
+        const msgDisplay = document.getElementById('message');
+
+        try {
+            // Fetch time from WorldTimeAPI to prevent cheating
+            // We use 'etc/utc' to get a standard time, then compare locally
+            const response = await fetch('http://worldtimeapi.org/api/timezone/Etc/UTC');
+            const data = await response.json();
+            
+            // Convert server time to a Date object
+            const now = new Date(data.utc_datetime);
+            const start = new Date(REVEAL_DATE);
+            const end = new Date(EXPIRY_DATE);
+
+            // Get the ID from the URL (e.g., ?id=1)
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+
+            loadingDiv.style.display = 'none';
+            contentDiv.style.display = 'block';
+
+            if (now < start) {
+                // IT IS TOO EARLY
+                title.innerText = "⏳ Not Yet!";
+                msgDisplay.innerText = "This message is locked until Jan 1st.";
+            } else if (now > end) {
+                // IT IS TOO LATE
+                title.innerText = "⌛ Expired";
+                msgDisplay.innerText = "This message has disappeared into the past.";
+            } else {
+                // IT IS TIME
+                if (messages[id]) {
+                    title.innerText = "Secret Revealed!";
+                    msgDisplay.innerText = messages[id];
+                } else {
+                    title.innerText = "Error";
+                    msgDisplay.innerText = "Invalid QR Code.";
+                }
+            }
+
+        } catch (error) {
+            // Fallback if the time API fails (e.g. no internet)
+            // In this case, we fall back to device time, but warn them.
+            console.log(error);
+            loadingDiv.style.display = 'none';
+            contentDiv.style.display = 'block';
+            title.innerText = "⚠️ Connection Error";
+            msgDisplay.innerText = "Could not verify global time. Please check your internet.";
+        }
+    }
+
+    checkTime();
+</script>
+
+</body>
+</html>
