@@ -77,8 +77,8 @@
         // ================= CONFIGURATION =================
         
         // DATE MUST BE IN UTC
-        const REVEAL_DATE = "2025-12-11T00:00:00Z"; 
-        const EXPIRY_DATE = "2025-12-20T00:00:00Z";
+        const REVEAL_DATE = "2025-12-28T00:00:00Z"; 
+        const EXPIRY_DATE = "2025-12-30T00:00:00Z";
 
         // FIX 2: Define your custom titles here
         const PAGE_TITLES = {
@@ -160,18 +160,10 @@
         function renderState(state) {
             if (state === "early") {
                 contentBox.innerHTML = `
-                    <span class="icon">🔒</span>
-                    <h1>Locked</h1>
-                    <div id="message-content" style="text-align:center">
-                        This time capsule opens on Jan 1st.
-                    </div>`;
+                    <h1>Radical Rest</h1>`;
             } else if (state === "expired") {
                 contentBox.innerHTML = `
-                    <span class="icon">⌛</span>
-                    <h1>Expired</h1>
-                    <div id="message-content" style="text-align:center">
-                        The moment has passed.
-                    </div>`;
+                    <h1>Expired</h1>`;
             } else {
                 contentBox.innerHTML = `
                     <span class="icon">❓</span>
