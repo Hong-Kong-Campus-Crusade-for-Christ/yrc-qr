@@ -98,7 +98,7 @@
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
 
-            let now = await getGlobalTime();
+            const now = new Date();
             
             const start = new Date(REVEAL_DATE);
             const end = new Date(EXPIRY_DATE);
@@ -119,21 +119,21 @@
             container.style.opacity = 1;
         }
 
-        async function getGlobalTime() {
-            try {
-                const r1 = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC');
-                const d1 = await r1.json();
-                return new Date(d1.utc_datetime);
-            } catch (e) {
-                try {
-                    const r2 = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=UTC');
-                    const d2 = await r2.json();
-                    return new Date(d2.dateTime + "Z");
-                } catch (e2) {
-                    return new Date();
-                }
-            }
-        }
+        // async function getGlobalTime() {
+        //     try {
+        //         const r1 = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC');
+        //         const d1 = await r1.json();
+        //         return new Date(d1.utc_datetime);
+        //     } catch (e) {
+        //         try {
+        //             const r2 = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=UTC');
+        //             const d2 = await r2.json();
+        //             return new Date(d2.dateTime + "Z");
+        //         } catch (e2) {
+        //             return new Date();
+        //         }
+        //     }
+        // }
 
         async function fetchAndShowMessage(id) {
             try {
